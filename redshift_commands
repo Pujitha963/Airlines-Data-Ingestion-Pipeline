@@ -1,0 +1,38 @@
+-- This script creates the necessary schema and tables in Amazon Redshift for the Airlines Data Ingestion Pipeline.
+
+CREATE SCHEMA airlines;
+
+-- Dimension table for airport codes
+CREATE TABLE airlines.dim_airport_codes (
+    airport_id BIGINT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    name VARCHAR(200)
+);
+
+-- Load data into the dim_airport_codes table from S3
+COPY airlines.dim_airport_codes
+FROM 's3://airlines-pipeline/airport_dim/airports_codes.csv'
+IAM_ROLE 'arn:aws:iam::028828332390:role/service-role/AmazonRedshift-CommandsAccessRole-20250531T174023'
+DELIMITER ','
+IGNOREHEADER 1
+REGION 'us-east-1';
+
+SELECT * FROM airlines.dim_airport_codes limit 5;
+
+-- Table to store transformed daily flights data
+CREATE TABLE airlines.daily_flights_processed (
+    carrier VARCHAR(10),
+    dep_airport VARCHAR(200),
+    arr_airport VARCHAR(200),
+    dep_city VARCHAR(100),
+    arr_city VARCHAR(100),
+    dep_state VARCHAR(100),
+    arr_state VARCHAR(100),
+    dep_delay BIGINT,
+    arr_delay BIGINT
+);
+
+SELECT * FROM airlines.daily_flights_processed limit 5;
+
+SELECT count(*) FROM airlines.daily_flights_processed;
